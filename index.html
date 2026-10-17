@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrigoLab — Simulasi Interaktif Rumus Sinus, Cosinus, dan Tangen</title>
+  <meta name="description" content="Simulasi interaktif visualisasi lingkaran satuan (unit circle) dan grafik gelombang rumus matematika sinus, cosinus, dan tangen secara real-time dengan audio synthesizer dan sandbox transformasi.">
+  
+  <!-- Google Fonts: Outfit & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Background Glow Effects -->
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-purple"></div>
+  <div class="ambient-glow glow-amber"></div>
+
+  <div class="app-wrapper">
+    <!-- Header Aplikasi -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 40 40" width="36" height="36" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="rgba(0, 240, 255, 0.4)" stroke-width="2"/>
+            <path d="M6 20 C12 8, 16 8, 20 20 C24 32, 28 32, 34 20" stroke="#00f0ff" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="3" fill="#a855f7"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">TrigoLab <span class="badge-version">Simulasi Interaktif</span></h1>
+          <p class="brand-subtitle">Eksplorasi Geometri Lingkaran Satuan & Grafik Gelombang Sinus, Cosinus, Tangen</p>
+        </div>
+      </div>
+
+      <!-- Mode Navigasi Tabs -->
+      <nav class="mode-tabs" aria-label="Mode Simulasi">
+        <button id="tab-dual" class="mode-tab-btn active" data-mode="dual">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 3h8v18H3zm10 0h8v18h-8z"/></svg>
+          Lingkaran & Gelombang
+        </button>
+        <button id="tab-wave-focus" class="mode-tab-btn" data-mode="wave-focus">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+          Fokus Grafik
+        </button>
+        <button id="tab-transform" class="mode-tab-btn" data-mode="transform">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 3v2c3.87 0 7 3.13 7 7s-3.13 7-7 7-7-3.13-7-7H3c0 4.97 4.03 9 9 9s9-4.03 9-9-4.03-9-9-9z"/><path d="M12 7v5l4 2"/></svg>
+          Transformasi Gelombang
+        </button>
+        <button id="tab-theory" class="mode-tab-btn" data-mode="theory">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+          Tabel & Teori
+        </button>
+      </nav>
+
+      <!-- Quick Actions Header -->
+      <div class="header-actions">
+        <button id="btn-play" class="action-btn play-btn" aria-label="Putar atau Jeda Animasi">
+          <span id="play-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+          <span class="btn-label">Putar</span>
+        </button>
+
+        <button id="btn-reset" class="action-btn icon-btn" title="Reset Sudut ke 0°" aria-label="Reset">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </button>
+
+        <div class="speed-selector" title="Kecepatan Animasi">
+          <button class="speed-pill" data-speed="0.25">0.25x</button>
+          <button class="speed-pill" data-speed="0.5">0.5x</button>
+          <button class="speed-pill active" data-speed="1.0">1x</button>
+          <button class="speed-pill" data-speed="2.0">2x</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Visual Stage (Dual or Focused) -->
+    <main id="main-stage" class="stage-container layout-dual">
+      <!-- Card Lingkaran Satuan -->
+      <section class="stage-card unit-circle-card" aria-label="Simulasi Lingkaran Satuan">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="indicator-dot dot-cyan"></span>
+            <h2 class="card-title">Lingkaran Satuan <span class="math-sub">(Unit Circle r=1)</span></h2>
+          </div>
+          <span class="card-hint">Tarik titik putih untuk mengubah sudut</span>
+        </div>
+        <div class="canvas-wrapper circle-canvas-box">
+          <canvas id="unit-circle-canvas" width="400" height="380"></canvas>
+          <div class="circle-legend-overlay">
+            <span class="legend-pill pill-cyan">Sin: Sisi Depan (y)</span>
+            <span class="legend-pill pill-purple">Cos: Sisi Samping (x)</span>
+            <span class="legend-pill pill-amber">Tan: Garis Singgung</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card Grafik Gelombang Kartesius -->
+      <section class="stage-card wave-card" aria-label="Grafik Gelombang Sinus Cosinus Tangen">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="indicator-dot dot-multi"></span>
+            <h2 class="card-title">Grafik Gelombang Trigonometri <span class="math-sub">f(θ)</span></h2>
+          </div>
+          <!-- Legend Toggles Inline -->
+          <div class="wave-legend">
+            <label class="legend-check check-sin" title="Tampilkan Grafik Sinus">
+              <input type="checkbox" id="toggle-sin" checked>
+              <span class="custom-chk"></span>
+              <span class="lbl-text"><span class="color-badge badge-sin"></span> Sinus [y = sin(θ)]</span>
+            </label>
+            <label class="legend-check check-cos" title="Tampilkan Grafik Cosinus">
+              <input type="checkbox" id="toggle-cos" checked>
+              <span class="custom-chk"></span>
+              <span class="lbl-text"><span class="color-badge badge-cos"></span> Cosinus [y = cos(θ)]</span>
+            </label>
+            <label class="legend-check check-tan" title="Tampilkan Grafik Tangen">
+              <input type="checkbox" id="toggle-tan" checked>
+              <span class="custom-chk"></span>
+              <span class="lbl-text"><span class="color-badge badge-tan"></span> Tangen [y = tan(θ)]</span>
+            </label>
+          </div>
+        </div>
+        <div class="canvas-wrapper wave-canvas-box">
+          <canvas id="wave-canvas" width="700" height="380"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <!-- Panel Kontrol Sudut Interaktif & Sudut Istimewa -->
+    <section class="control-panel glass-panel" aria-label="Kontrol Sudut">
+      <div class="control-row">
+        <div class="angle-scrubber-group">
+          <label for="angle-slider" class="scrubber-label">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            Sudut Putaran (θ):
+          </label>
+          <div class="slider-input-combo">
+            <input type="range" id="angle-slider" min="0" max="360" step="0.5" value="45" class="custom-slider">
+            <div class="angle-input-box">
+              <input type="number" id="angle-number-input" min="0" max="720" step="1" value="45">
+              <span class="unit-deg">°</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Toggles -->
+        <div class="quick-toggles">
+          <label class="toggle-switch-lbl" title="Garis Proyeksi Laser dari Lingkaran ke Gelombang">
+            <input type="checkbox" id="toggle-laser" checked>
+            <span class="switch-box"></span>
+            Proyeksi Laser
+          </label>
+          <label class="toggle-switch-lbl" title="Tampilkan Segitiga Siku-siku">
+            <input type="checkbox" id="toggle-triangle" checked>
+            <span class="switch-box"></span>
+            Segitiga Siku-siku
+          </label>
+          <label class="toggle-switch-lbl" title="Garis Asimtot Tegak Tangen">
+            <input type="checkbox" id="toggle-asymptote" checked>
+            <span class="switch-box"></span>
+            Garis Asimtot
+          </label>
+          <label class="toggle-switch-lbl audio-switch-lbl" title="Dengarkan Frekuensi Nada Sinus Akustik">
+            <input type="checkbox" id="toggle-audio">
+            <span class="switch-box"></span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            Suara Gelombang
+          </label>
+        </div>
+      </div>
+
+      <!-- Quick Angle Chips (Sudut-Sudut Istimewa) -->
+      <div class="special-angles-bar">
+        <span class="chips-label">Pilih Sudut Istimewa:</span>
+        <div class="chips-scroll">
+          <button class="angle-chip" data-deg="0">0°</button>
+          <button class="angle-chip" data-deg="30">30° (π/6)</button>
+          <button class="angle-chip active" data-deg="45">45° (π/4)</button>
+          <button class="angle-chip" data-deg="60">60° (π/3)</button>
+          <button class="angle-chip" data-deg="90">90° (π/2)</button>
+          <button class="angle-chip" data-deg="120">120° (2π/3)</button>
+          <button class="angle-chip" data-deg="135">135° (3π/4)</button>
+          <button class="angle-chip" data-deg="150">150° (5π/6)</button>
+          <button class="angle-chip" data-deg="180">180° (π)</button>
+          <button class="angle-chip" data-deg="210">210° (7π/6)</button>
+          <button class="angle-chip" data-deg="225">225° (5π/4)</button>
+          <button class="angle-chip" data-deg="240">240° (4π/3)</button>
+          <button class="angle-chip" data-deg="270">270° (3π/2)</button>
+          <button class="angle-chip" data-deg="300">300° (5π/3)</button>
+          <button class="angle-chip" data-deg="315">315° (7π/4)</button>
+          <button class="angle-chip" data-deg="330">330° (11π/6)</button>
+          <button class="angle-chip" data-deg="360">360° (2π)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Telemetri Real-Time Matematika Cards -->
+    <section class="telemetry-grid" aria-label="Data Nilai Matematika">
+      <!-- Card Sudut & Kuadran -->
+      <div class="telemetry-card card-angle">
+        <div class="telemetry-header">
+          <span class="telemetry-title">SUDUT SAAT INI (θ)</span>
+          <span id="quadrant-badge" class="badge-quad">Kuadran I</span>
+        </div>
+        <div class="telemetry-body">
+          <div class="primary-val-row">
+            <span id="deg-display" class="large-val">45.0°</span>
+            <span id="rad-display" class="sub-val">0.785 rad (π/4)</span>
+          </div>
+          <p id="quadrant-desc" class="telemetry-note">Semua fungsi bernilai Positif (+)</p>
+        </div>
+      </div>
+
+      <!-- Card Sinus -->
+      <div class="telemetry-card card-sin">
+        <div class="telemetry-header">
+          <span class="telemetry-title color-sin">SINUS (sin θ)</span>
+          <span class="geom-ratio">y / r (Depan / Miring)</span>
+        </div>
+        <div class="telemetry-body">
+          <div class="primary-val-row">
+            <span id="sin-val" class="large-val color-sin">0.7071</span>
+            <span id="sin-exact" class="exact-badge">Eksak: ½√2</span>
+          </div>
+          <div class="prop-bar"><div class="bar-fill fill-sin" style="width: 70.7%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Card Cosinus -->
+      <div class="telemetry-card card-cos">
+        <div class="telemetry-header">
+          <span class="telemetry-title color-cos">COSINUS (cos θ)</span>
+          <span class="geom-ratio">x / r (Samping / Miring)</span>
+        </div>
+        <div class="telemetry-body">
+          <div class="primary-val-row">
+            <span id="cos-val" class="large-val color-cos">0.7071</span>
+            <span id="cos-exact" class="exact-badge">Eksak: ½√2</span>
+          </div>
+          <div class="prop-bar"><div class="bar-fill fill-cos" style="width: 70.7%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Card Tangen -->
+      <div class="telemetry-card card-tan">
+        <div class="telemetry-header">
+          <span class="telemetry-title color-tan">TANGEN (tan θ)</span>
+          <span class="geom-ratio">y / x = sin θ / cos θ</span>
+        </div>
+        <div class="telemetry-body">
+          <div class="primary-val-row">
+            <span id="tan-val" class="large-val color-tan">1.0000</span>
+            <span id="tan-exact" class="exact-badge">Eksak: 1</span>
+          </div>
+          <div class="prop-bar"><div class="bar-fill fill-tan" style="width: 50%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Card Identitas Pythagoras -->
+      <div class="telemetry-card card-pythagoras">
+        <div class="telemetry-header">
+          <span class="telemetry-title">IDENTITAS PYTHAGORAS</span>
+          <span class="geom-ratio">sin²θ + cos²θ ≡ 1</span>
+        </div>
+        <div class="telemetry-body">
+          <div class="primary-val-row">
+            <span id="pythagorean-val" class="large-val">1.0000</span>
+            <span class="exact-badge badge-constant">Konstan Mutlak</span>
+          </div>
+          <div class="prop-bar"><div id="pythagorean-bar" class="bar-fill fill-white" style="width: 100%;"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel Transformasi Gelombang Sandbox (y = A f(Bx + C) + D) -->
+    <section id="transform-panel" class="transform-sandbox glass-panel" style="display: none;" aria-label="Laboratorium Transformasi Gelombang">
+      <div class="sandbox-header">
+        <div>
+          <h3 class="sandbox-title">Laboratorium Transformasi Gelombang Trigonometri</h3>
+          <p class="sandbox-desc">Eksplorasi bagaimana amplitudo (A), frekuensi (B), pergeseran fase (C), dan pergeseran vertikal (D) mempengaruhi gelombang.</p>
+        </div>
+        
+        <!-- Pemilih Fungsi: Sin, Cos, Tan -->
+        <div class="func-selector-group">
+          <button class="func-choice-btn active" data-func="sin">Sinus [sin]</button>
+          <button class="func-choice-btn" data-func="cos">Cosinus [cos]</button>
+          <button class="func-choice-btn" data-func="tan">Tangen [tan]</button>
+        </div>
+      </div>
+
+      <!-- Formula Display Real-Time -->
+      <div class="formula-banner">
+        <div class="formula-label">Persamaan Aktif:</div>
+        <div id="live-formula" class="math-formula-box">
+          <span class="var-y">y</span> = <span class="var-a">1.00</span> · <span class="var-func">sin</span>(<span class="var-b">1.00</span>x)
+        </div>
+      </div>
+
+      <!-- Grid 4 Parameter Sliders -->
+      <div class="params-grid">
+        <!-- Param A: Amplitudo -->
+        <div class="param-box">
+          <div class="param-info">
+            <span class="param-name"><strong class="highlight-var">A</strong> (Amplitudo)</span>
+            <span id="param-a-val" class="param-val">1.00</span>
+          </div>
+          <input type="range" id="param-a-slider" min="0.1" max="3.0" step="0.1" value="1.0" class="custom-slider slider-param">
+          <span class="param-hint">Mengatur tinggi puncak & kedalaman lembah</span>
+        </div>
+
+        <!-- Param B: Frekuensi / Kerapatan -->
+        <div class="param-box">
+          <div class="param-info">
+            <span class="param-name"><strong class="highlight-var">B</strong> (Frekuensi Sudut)</span>
+            <span id="param-b-val" class="param-val">1.00</span>
+          </div>
+          <input type="range" id="param-b-slider" min="0.2" max="5.0" step="0.1" value="1.0" class="custom-slider slider-param">
+          <span class="param-hint">Periode gelombang T = 2π / B</span>
+        </div>
+
+        <!-- Param C: Pergeseran Fase -->
+        <div class="param-box">
+          <div class="param-info">
+            <span class="param-name"><strong class="highlight-var">C</strong> (Pergeseran Fase)</span>
+            <span id="param-c-val" class="param-val">0.00 rad</span>
+          </div>
+          <input type="range" id="param-c-slider" min="-3.1415" max="3.1415" step="0.1" value="0.0" class="custom-slider slider-param">
+          <span class="param-hint">Menggeser kurva ke kiri (+) atau ke kanan (-)</span>
+        </div>
+
+        <!-- Param D: Pergeseran Vertikal -->
+        <div class="param-box">
+          <div class="param-info">
+            <span class="param-name"><strong class="highlight-var">D</strong> (Pergeseran Vertikal)</span>
+            <span id="param-d-val" class="param-val">0.00</span>
+          </div>
+          <input type="range" id="param-d-slider" min="-2.0" max="2.0" step="0.1" value="0.0" class="custom-slider slider-param">
+          <span class="param-hint">Menaikkan atau menurunkan garis tengah</span>
+        </div>
+      </div>
+
+      <!-- Presets Cepat -->
+      <div class="presets-row">
+        <span class="preset-title">Preset Menarik:</span>
+        <button class="preset-btn" data-preset="standard">Gelombang Standar</button>
+        <button class="preset-btn" data-preset="high-amp">Amplitudo Tinggi (2.5x)</button>
+        <button class="preset-btn" data-preset="fast-freq">Frekuensi Tinggi (3x)</button>
+        <button class="preset-btn" data-preset="phase-shift">Fase 90° (Sinus → Cosinus)</button>
+        <button class="preset-btn" data-preset="floating">Gelombang Mengambang</button>
+      </div>
+    </section>
+
+    <!-- Teori, Konsep & Tabel Sudut Istimewa Lengkap -->
+    <section id="theory-section" class="theory-container glass-panel" aria-label="Teori dan Pembahasan Matematika">
+      <div class="theory-header">
+        <h2 class="theory-main-title">Panduan Lengkap & Teori Rumus Trigonometri</h2>
+        <p class="theory-main-subtitle">Pelajari konsep fundamental, hubungan segitiga siku-siku, asimtot, dan aplikasi di dunia nyata.</p>
+      </div>
+
+      <div class="theory-grid">
+        <!-- Kolom 1: Konsep Dasar & Segitiga -->
+        <div class="theory-card">
+          <h3 class="theory-card-title">
+            <span class="badge-num">1</span> Definisi Geometri Segitiga Siku-siku
+          </h3>
+          <p class="theory-p">Dalam sebuah segitiga siku-siku dengan sudut acuan <strong>θ</strong>:</p>
+          <ul class="theory-list">
+            <li><strong>Sinus (sin θ)</strong> = <span class="math-hl">Depan / Miring</span> = <span class="math-hl">y / r</span></li>
+            <li><strong>Cosinus (cos θ)</strong> = <span class="math-hl">Samping / Miring</span> = <span class="math-hl">x / r</span></li>
+            <li><strong>Tangen (tan θ)</strong> = <span class="math-hl">Depan / Samping</span> = <span class="math-hl">y / x</span> = <span class="math-hl">sin θ / cos θ</span></li>
+          </ul>
+          <p class="theory-p">Pada <strong>lingkaran satuan</strong> (jari-jari <em>r = 1</em>), koordinat titik di keliling lingkaran adalah tepat <code>(cos θ, sin θ)</code>!</p>
+        </div>
+
+        <!-- Kolom 2: Mengapa Sinus Berbentuk Gelombang -->
+        <div class="theory-card">
+          <h3 class="theory-card-title">
+            <span class="badge-num">2</span> Mengapa Sinus Berbentuk Gelombang?
+          </h3>
+          <p class="theory-p">Ketika sebuah titik berputar melingkar dengan kecepatan konstan:</p>
+          <ul class="theory-list">
+            <li>Ketinggian vertikalnya (proyeksi ke sumbu Y) bergerak naik-turun secara harmonis antara <strong>-1</strong> dan <strong>+1</strong>.</li>
+            <li>Jika gerakan naik-turun ini ditarik seiring berjalannya waktu (atau bertambahnya sudut θ), terciptalah <strong>gelombang sinusoidal</strong>.</li>
+            <li>Gelombang Cosinus memiliki bentuk yang persis sama dengan Sinus, hanya saja bergeser fase sebesar <strong>90° (π/2 rad)</strong> lebih awal: <code>cos(θ) = sin(θ + π/2)</code>.</li>
+          </ul>
+        </div>
+
+        <!-- Kolom 3: Misteri Asimtot Tangen -->
+        <div class="theory-card">
+          <h3 class="theory-card-title">
+            <span class="badge-num">3</span> Mengapa Tangen Memiliki Asimtot?
+          </h3>
+          <p class="theory-p">Rumus tangen adalah pembagian antara sinus dan cosinus:</p>
+          <div class="formula-callout">tan(θ) = sin(θ) / cos(θ)</div>
+          <p class="theory-p">Ketika sudut mencapai <strong>90° (π/2)</strong> atau <strong>270° (3π/2)</strong>, nilai cosinus menjadi <strong>0</strong>. Pembagian dengan nol menghasilkan nilai tak terhingga (<strong>±∞</strong>).</p>
+          <p class="theory-p">Garis vertikal tempat fungsi melonjak tak terhingga disebut <strong>Garis Asimtot Tegak</strong>.</p>
+        </div>
+
+        <!-- Kolom 4: Jembatan Keledai Tanda Kuadran -->
+        <div class="theory-card">
+          <h3 class="theory-card-title">
+            <span class="badge-num">4</span> Aturan Kuadran (Jembatan Keledai)
+          </h3>
+          <p class="theory-p">Tanda positif (+) dan negatif (-) fungsi di tiap kuadran:</p>
+          <div class="quadrant-matrix">
+            <div class="quad-cell"><span class="q-title">Kuadran II (90°–180°)</span><span class="q-rule color-sin">Hanya SINUS (+)</span></div>
+            <div class="quad-cell"><span class="q-title">Kuadran I (0°–90°)</span><span class="q-rule color-cyan">SEMUA Positif (+)</span></div>
+            <div class="quad-cell"><span class="q-title">Kuadran III (180°–270°)</span><span class="q-rule color-tan">Hanya TANGEN (+)</span></div>
+            <div class="quad-cell"><span class="q-title">Kuadran IV (270°–360°)</span><span class="q-rule color-cos">Hanya COSINUS (+)</span></div>
+          </div>
+          <p class="theory-mnemonic">Mnemonic Populer: <strong>"SE-SIN-TA-KO"</strong> (<em>Semua Sindikat Tangannya Kosong</em> atau <em>All Students Take Calculus</em>).</p>
+        </div>
+      </div>
+
+      <!-- Tabel Sudut Istimewa Lengkap -->
+      <div class="special-table-box">
+        <h3 class="table-box-title">Tabel Nilai Sudut Istimewa Trigonometri</h3>
+        <p class="table-box-sub">Klik salah satu baris untuk langsung memposisikan simulasi ke sudut tersebut:</p>
+        <div class="table-responsive">
+          <table class="trig-table">
+            <thead>
+              <tr>
+                <th>Derajat</th>
+                <th>Radian</th>
+                <th>Sinus (sin θ)</th>
+                <th>Cosinus (cos θ)</th>
+                <th>Tangen (tan θ)</th>
+                <th>Kuadran</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="table-row-special" data-deg="0">
+                <td><strong>0°</strong></td>
+                <td>0</td>
+                <td class="color-sin">0</td>
+                <td class="color-cos">1</td>
+                <td class="color-tan">0</td>
+                <td>Sumbu +X</td>
+              </tr>
+              <tr class="table-row-special" data-deg="30">
+                <td><strong>30°</strong></td>
+                <td>π/6</td>
+                <td class="color-sin">1/2</td>
+                <td class="color-cos">½√3</td>
+                <td class="color-tan">⅓√3</td>
+                <td>Kuadran I</td>
+              </tr>
+              <tr class="table-row-special highlight-row" data-deg="45">
+                <td><strong>45°</strong></td>
+                <td>π/4</td>
+                <td class="color-sin">½√2</td>
+                <td class="color-cos">½√2</td>
+                <td class="color-tan">1</td>
+                <td>Kuadran I</td>
+              </tr>
+              <tr class="table-row-special" data-deg="60">
+                <td><strong>60°</strong></td>
+                <td>π/3</td>
+                <td class="color-sin">½√3</td>
+                <td class="color-cos">1/2</td>
+                <td class="color-tan">√3</td>
+                <td>Kuadran I</td>
+              </tr>
+              <tr class="table-row-special" data-deg="90">
+                <td><strong>90°</strong></td>
+                <td>π/2</td>
+                <td class="color-sin">1</td>
+                <td class="color-cos">0</td>
+                <td class="color-tan asymp-text">∞ (Tak Terdefinisi)</td>
+                <td>Sumbu +Y</td>
+              </tr>
+              <tr class="table-row-special" data-deg="120">
+                <td><strong>120°</strong></td>
+                <td>2π/3</td>
+                <td class="color-sin">½√3</td>
+                <td class="color-cos">-1/2</td>
+                <td class="color-tan">-√3</td>
+                <td>Kuadran II</td>
+              </tr>
+              <tr class="table-row-special" data-deg="135">
+                <td><strong>135°</strong></td>
+                <td>3π/4</td>
+                <td class="color-sin">½√2</td>
+                <td class="color-cos">-½√2</td>
+                <td class="color-tan">-1</td>
+                <td>Kuadran II</td>
+              </tr>
+              <tr class="table-row-special" data-deg="150">
+                <td><strong>150°</strong></td>
+                <td>5π/6</td>
+                <td class="color-sin">1/2</td>
+                <td class="color-cos">-½√3</td>
+                <td class="color-tan">-⅓√3</td>
+                <td>Kuadran II</td>
+              </tr>
+              <tr class="table-row-special" data-deg="180">
+                <td><strong>180°</strong></td>
+                <td>π</td>
+                <td class="color-sin">0</td>
+                <td class="color-cos">-1</td>
+                <td class="color-tan">0</td>
+                <td>Sumbu -X</td>
+              </tr>
+              <tr class="table-row-special" data-deg="210">
+                <td><strong>210°</strong></td>
+                <td>7π/6</td>
+                <td class="color-sin">-1/2</td>
+                <td class="color-cos">-½√3</td>
+                <td class="color-tan">⅓√3</td>
+                <td>Kuadran III</td>
+              </tr>
+              <tr class="table-row-special" data-deg="225">
+                <td><strong>225°</strong></td>
+                <td>5π/4</td>
+                <td class="color-sin">-½√2</td>
+                <td class="color-cos">-½√2</td>
+                <td class="color-tan">1</td>
+                <td>Kuadran III</td>
+              </tr>
+              <tr class="table-row-special" data-deg="240">
+                <td><strong>240°</strong></td>
+                <td>4π/3</td>
+                <td class="color-sin">-½√3</td>
+                <td class="color-cos">-1/2</td>
+                <td class="color-tan">√3</td>
+                <td>Kuadran III</td>
+              </tr>
+              <tr class="table-row-special" data-deg="270">
+                <td><strong>270°</strong></td>
+                <td>3π/2</td>
+                <td class="color-sin">-1</td>
+                <td class="color-cos">0</td>
+                <td class="color-tan asymp-text">-∞ (Tak Terdefinisi)</td>
+                <td>Sumbu -Y</td>
+              </tr>
+              <tr class="table-row-special" data-deg="300">
+                <td><strong>300°</strong></td>
+                <td>5π/3</td>
+                <td class="color-sin">-½√3</td>
+                <td class="color-cos">1/2</td>
+                <td class="color-tan">-√3</td>
+                <td>Kuadran IV</td>
+              </tr>
+              <tr class="table-row-special" data-deg="315">
+                <td><strong>315°</strong></td>
+                <td>7π/4</td>
+                <td class="color-sin">-½√2</td>
+                <td class="color-cos">½√2</td>
+                <td class="color-tan">-1</td>
+                <td>Kuadran IV</td>
+              </tr>
+              <tr class="table-row-special" data-deg="360">
+                <td><strong>360°</strong></td>
+                <td>2π</td>
+                <td class="color-sin">0</td>
+                <td class="color-cos">1</td>
+                <td class="color-tan">0</td>
+                <td>Sumbu +X</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer & Keyboard Navigation Shortcuts -->
+    <footer class="app-footer">
+      <div class="shortcut-pills">
+        <span class="shortcut-label">Shortcut Keyboard:</span>
+        <span class="kbd-pill"><kbd>Spasi</kbd> Putar / Jeda</span>
+        <span class="kbd-pill"><kbd>←</kbd> <kbd>→</kbd> Geser Sudut ±5° (±15° dg Shift)</span>
+        <span class="kbd-pill"><kbd>R</kbd> Reset ke 0°</span>
+      </div>
+      <div class="footer-copy">
+        TrigoLab &bull; Visualisasi Interaktif Gelombang & Lingkaran Satuan Trigonometri
+      </div>
+    </footer>
+  </div>
+
+  <!-- Script Modules -->
+  <script src="js/trig-math.js"></script>
+  <script src="js/unit-circle.js"></script>
+  <script src="js/wave-canvas.js"></script>
+  <script src="js/audio-synth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
